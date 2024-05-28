@@ -23,10 +23,16 @@ The deep learning strategy used is called ***(Deep) Q Learning*** that improves 
 #### Loss Function
 Uses the ***Bellman Equation***
 ![Alt text](Images/bellman_eq.jpeg)
-Here a simplified version:
+Here is a simplified version:
 
 $Q = model * predict(state_{0})$
+
 $Q_{new} = R + \gamma * max(Q(state_{1}))$
+
+So, finally the loss function is:
+
+$loss = (Q_{new} - Q)^{2}$
+
 ### Important variables
 * `Reward`: is linked to important events, for eating food it is +10, game over gets -10 and everything else gets 0.
 * `Action`: encodes the movements, straight `[1,0,0]`, right turn `[0,1,0]`, and left turn `[0,0,1]`.
