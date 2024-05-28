@@ -2,6 +2,7 @@ import pygame
 import random
 from enum import Enum
 from collections import namedtuple
+import numpy as np
 
 pygame.init()  # Initialize all modules correctly
 font = pygame.font.Font('arial.ttf', 25)
@@ -88,33 +89,51 @@ class SnakeGameAI:  # Now it is an agent control game
         self.display.blit(text, [0, 0])
         pygame.display.flip()  # Update the whole display
 
-    def _move(self, direction: dict):
+    def _move(self, action: list):
         """
         Updates the coordinates of the snake
-        :param direction: command given by the player
+        :param action: action made by the AI agent.
+        [1, 0, 0] -> straight, [0, 1, 0] -> right turn, [0, 0, 1] -> left turn
         :return: None
         """
+        clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
+        idx = clock_wise.insert(self.direction)
+
+        if np.array_equal(action, [1, 0, 0]):  # If agents action is the current move (straight)
+            new_direction = clock_wise[idx]  # Keep the current direction
+        elif np.array_equal(action, [0, 1, 0]):  # If agents action is to make a right turn
+            next_idx = (idx + 1) % 4
+            new_direction = clock_wise[next_idx]  # Right turn (clockwise): right -> down -> left -> up
+        else:  # if action is [0, 0, 1]
+            next_idx = (idx - 1) % 4
+            new_direction = clock_wise[next_idx]  # Left turn (clockwise): right -> up -> left -> down
+
+        self.direction = new_direction
+
         x = self.head.x
         y = self.head.y
 
-        if direction == Direction.RIGHT:
+        if self.direction == Direction.RIGHT:
             x += BLOCK_SIZE
-        elif direction == Direction.LEFT:
+        elif self.direction == Direction.LEFT:
             x -= BLOCK_SIZE
-        elif direction == Direction.DOWN:
+        elif self.direction == Direction.DOWN:
             y += BLOCK_SIZE
-        elif direction == Direction.UP:
+        elif self.direction == Direction.UP:
             y -= BLOCK_SIZE
 
         self.head = Point(x, y)
 
-    def _is_collision(self) -> bool:
+    def _is_collision(self, pt=None) -> bool:
         """
         Define collision events
         :return: If collision occurs
         """
-        x = self.head.x
-        y = self.head.y
+        if pt is None:
+            pt = self.head
+
+        x = pt.x
+        y = pt.y
         # Hits boundary
         if x > self.w - BLOCK_SIZE or x < 0 or y > self.h - BLOCK_SIZE or y < 0:
             return True
@@ -153,31 +172,38 @@ class SnakeGameAI:  # Now it is an agent control game
         self.direction = prev_direction if opposite_direction.get(self.direction) == prev_direction else self.direction
         return prev_direction
 
-    def play_step(self):
+    def play_step(self, action):
+        self.frame_iteration += 1
         # Collect user input
         self._collect_user_input()
 
         # Move
-        self._move(self.direction)
+        self._move(action)
         self.snake.insert(0, self.head)  # Update the head at the beginning of the snake list
 
         # Check game over status
+        reward = 0
         game_over = False
-        if self._is_collision():
+        if self._is_collision() or self.frame_iteration > 100 * len(self.snake):  # Collision or no improvement
             game_over = True
+            reward = -10
             return game_over, self.score
         # Place new food or just move
         if self.head == self.food:
             self.score += 1
+            reward = 10
             self._place_food()
         else:
             self.snake.pop()
+
         # Update UI and Clock
         self._update_ui()
         self.clock.tick(SPEED)
+
         # Return game over and score
         game_over = False
-        return game_over, self.score
+
+        return reward, game_over, self.score
 
 
 if __name__ == '__main__':
