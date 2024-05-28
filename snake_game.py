@@ -14,7 +14,16 @@ BLUE1 = (0, 0, 255)
 BLUE2 = (0, 100, 255)
 BLACK = (0, 0, 0)
 BLOCK_SIZE = 20
-SPEED = 10
+SPEED = 20
+
+"""
+Changes to implement the ML algorithm:
+
+1. Create a reset function so agent is able to restart the game and start with a new iteration
+2. Implement a reward that the agent wins in each iteration
+3. Create a play function play(function) -> direction 
+4. Store the iteration number game_iteration 
+"""
 
 
 class Direction(Enum):  # Set symbolic names bounded to unique values
@@ -24,7 +33,7 @@ class Direction(Enum):  # Set symbolic names bounded to unique values
     DOWN = 4
 
 
-class SnakeGame:
+class SnakeGameAI:  # Now it is an agent control game
 
     def __init__(self, w=640, h=480):
         self.w = w
@@ -34,7 +43,13 @@ class SnakeGame:
         self.display = pygame.display.set_mode((self.w, self.h))
         pygame.display.set_caption('Snake')
         self.clock = pygame.time.Clock()
+        self.reset()
 
+    def reset(self):
+        """
+        Restore the game parameters to default values
+        :return: None
+        """
         # Initialize game state
         self.direction = Direction.RIGHT  # Snake starts moving to the right
         self.head = InitialPoint(self.w / 2, self.h / 2)
@@ -43,6 +58,7 @@ class SnakeGame:
         self.score = 0
         self.food = None
         self._place_food()
+        self.frame_iteration = 0
 
     def _place_food(self):
         """
@@ -117,7 +133,7 @@ class SnakeGame:
         opposite_direction = {
             Direction.RIGHT: Direction.LEFT,
             Direction.LEFT: Direction.RIGHT,
-            Direction.UP: Direction.UP,
+            Direction.UP: Direction.DOWN,
             Direction.DOWN: Direction.UP
         }
         for event in pygame.event.get():  # Get all user events
@@ -139,7 +155,7 @@ class SnakeGame:
 
     def play_step(self):
         # Collect user input
-        direction_bef_input = self._collect_user_input()
+        self._collect_user_input()
 
         # Move
         self._move(self.direction)
@@ -174,5 +190,6 @@ if __name__ == '__main__':
         # Break if game over
         if game_over:
             break
+
     pygame.quit()
 
