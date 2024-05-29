@@ -97,7 +97,7 @@ class SnakeGameAI:  # Now it is an agent control game
         :return: None
         """
         clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
-        idx = clock_wise.insert(self.direction)
+        idx = clock_wise.index(self.direction)
 
         if np.array_equal(action, [1, 0, 0]):  # If agents action is the current move (straight)
             new_direction = clock_wise[idx]  # Keep the current direction
@@ -124,7 +124,7 @@ class SnakeGameAI:  # Now it is an agent control game
 
         self.head = Point(x, y)
 
-    def _is_collision(self, pt=None) -> bool:
+    def is_collision(self, pt=None) -> bool:
         """
         Define collision events
         :return: If collision occurs
@@ -184,7 +184,7 @@ class SnakeGameAI:  # Now it is an agent control game
         # Check game over status
         reward = 0
         game_over = False
-        if self._is_collision() or self.frame_iteration > 100 * len(self.snake):  # Collision or no improvement
+        if self.is_collision() or self.frame_iteration > 100 * len(self.snake):  # Collision or no improvement
             game_over = True
             reward = -10
             return game_over, self.score
@@ -204,18 +204,4 @@ class SnakeGameAI:  # Now it is an agent control game
         game_over = False
 
         return reward, game_over, self.score
-
-
-if __name__ == '__main__':
-    game = SnakeGame()
-
-    # Game loop
-    while True:
-        game_over, score = game.play_step()
-
-        # Break if game over
-        if game_over:
-            break
-
-    pygame.quit()
 
