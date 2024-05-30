@@ -19,6 +19,8 @@ class Agent:
         self.gamma = 0  # Discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # If we exceed the memory, it will remove elements from the left
         # TODO: model & training
+        self.model = None
+        self.trainer = None
 
     @staticmethod
     def get_state(game):
@@ -115,17 +117,34 @@ class Agent:
         return np.array(state, dtype=int)  # Convert boolean values to binary
 
     def remember(self, state, action, reward, next_state, game_over):
-        pass
+        self.memory.append((state, action, reward, next_state, game_over))  # popleft if MAX_MEMORY is reached
 
     def train_long_memory(self):
-        pass
+        if len(self.memory) < BATCH_SIZE:
+            mini_sample = random.sample(self.memory, BATCH_SIZE)  # List of tuples
+        else:
+            mini_sample = self.memory
 
-    def train_short_memory(self):
-        pass
+        states, actions, rewards, next_states, game_overs = zip(*mini_sample)
+        self.trainer.train_step(states, actions, rewards, next_states, game_overs)
+
+    def train_short_memory(self, state, action, reward, next_state, game_over):
+        self.trainer.train_step(state, action, reward, next_state, game_over)
 
     def get_action(self, state):
-        pass
+        # Random Moves: Tradeoff between exploration and exploitation
+        self.epsilon = 80 - self.n_games  # The more games we have, the smaller epsilon gets
+        final_move = [0, 0, 0]
+        if random.randint(0, 200) < self.epsilon:  # Exploration
+            move = random.randint(0, 2)
+            final_move[move] = 1
+        else:  # Exploitation
+            state0 = torch.tensor(state, dtype=torch.float)
+            prediction = self.model.predict(state0)
+            move = torch.argmax(prediction).item()
+            final_move[move] = 1
 
+        return final_move
 
 def train():
     plot_scores = []
