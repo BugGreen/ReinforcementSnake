@@ -36,7 +36,7 @@ class Direction(Enum):  # Set symbolic names bounded to unique values
 
 class SnakeGameAI:  # Now it is an agent control game
 
-    def __init__(self, w=1280, h=960):
+    def __init__(self, w=640, h=480):
         self.w = w
         self.h = h
 

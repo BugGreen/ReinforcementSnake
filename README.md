@@ -1,8 +1,10 @@
 # ReinforcementSnake
-Project to understand library `Pygame` and the applicability of machine learning techniques to  learn how to play
+![Alt text](Images/game_and_training.png)
+
+Project to understand library `Pygame` and the applicability of machine learning techniques with `PyTorch` on games.
 
 ## Code organization 
-![Alt text](Images/code_org.png)
+![Alt text](Images/code_organization.png)
 ### Agent
 Has knowledge about `Game` and `Model` to implement the training loop.
 
