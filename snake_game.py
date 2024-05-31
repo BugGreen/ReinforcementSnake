@@ -36,7 +36,7 @@ class Direction(Enum):  # Set symbolic names bounded to unique values
 
 class SnakeGameAI:  # Now it is an agent control game
 
-    def __init__(self, w=640, h=480):
+    def __init__(self, w=1280, h=960):
         self.w = w
         self.h = h
 
@@ -187,7 +187,7 @@ class SnakeGameAI:  # Now it is an agent control game
         if self.is_collision() or self.frame_iteration > 100 * len(self.snake):  # Collision or no improvement
             game_over = True
             reward = -10
-            return game_over, self.score
+            return reward, game_over, self.score
         # Place new food or just move
         if self.head == self.food:
             self.score += 1
